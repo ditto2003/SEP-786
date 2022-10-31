@@ -24,7 +24,7 @@ good_data = mat_to_array(mat_contents_good)
 mat_contents_bad = Load_mat_single(path_bad)
 bad_data = mat_to_array(mat_contents_bad)
 
-
+show_time = True
 # constuct the data
 
 X = np.concatenate((good_data,bad_data))
@@ -47,7 +47,9 @@ C_x = np.dot(X_mean.T,X_mean)
 
 SS_pca,V = np.linalg.eig(C_x)
 
-sortIndex = np.flip(np.argsort(SS_pca))
+# from large to small
+
+sortIndex = np.flip(np.argsort(SS_pca)) 
 
 dimension = good_data.shape[1]
 VSorted = np.empty((dimension,0))
@@ -75,27 +77,26 @@ Y_test = Y[test_index]
 
 # Classifier 1 LDA with PCA
 
-start_time = time.time()
-main()
-print("--- %s seconds ---" % (time.time() - start_time))
 
-for numDims in range(4,9): 
+for numDims in range(4,9):
+     
     
    
     Score_Reduced = X_train[:,0:numDims]
-    print('Reduced score shape is ', Score_Reduced.shape)
+    
    
 
     lda_pca = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
     X_test_temp = X_test[:,0:numDims]
 
-    error,prediction_lda_pca = train_test(Score_Reduced,Y_train,X_test_temp,Y_test,  lda_pca)
+    error,prediction_lda_pca = train_test(Score_Reduced,Y_train,X_test_temp,Y_test,  lda_pca, show_time)
     
     
     classificationError_lda_pca[numDims-4] =error
-    print("Confusion matrix for LDA with PCA")
+    
+    print("========= Confusion matrix for LDA with PCA,Reduced score shape is {} ========== ".format(Score_Reduced.shape) )
 
-    plot_confusion_matrix(Y_test, prediction_lda_pca, lda_pca)
+    plot_confusion_matrix(Y_test, prediction_lda_pca, lda_pca, Score_Reduced)
 
 
 
@@ -106,7 +107,7 @@ for numDims in range(4,9):
     
     
     Score_Reduced = X_train[:,0:numDims]
-    print('Reduced score shape is ', Score_Reduced.shape)
+    
 
     clf_svm_pca = svm.SVC(kernel = 'linear')
 
@@ -115,14 +116,13 @@ for numDims in range(4,9):
     X_test_temp = X_test[:,0:numDims]
 
     error, prediction_svm_pca = train_test(
-        Score_Reduced, Y_train, X_test_temp, Y_test,  clf_svm_pca)
+        Score_Reduced, Y_train, X_test_temp, Y_test,  clf_svm_pca, show_time)
     
     classificationError_svm_pca[numDims-4] = error
 
 
-
-    print("Confusion matrix for SVM with PCA")
-    plot_confusion_matrix(Y_test, prediction_svm_pca, lda_pca)
+    print("========= Confusion matrix for SVM with PCA, Reduced score shape is {} ========== ".format(Score_Reduced.shape))
+    plot_confusion_matrix(Y_test, prediction_svm_pca, lda_pca, Score_Reduced)
 
 
 
@@ -147,7 +147,7 @@ print('Start Feature Selection with LDA...')
 removed = []
 
 index_all = [0,1,2,3,4,5, 6, 7]
-remaining = index_all
+remaining = index_all[:]
 
 
 
@@ -156,9 +156,14 @@ classificationError_lda_fs= n_test*np.ones(final_dimension)
 
 lda_fs = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
 
-error_temp, item_ignored = train_test(X_train_fs, Y_train, X_test_fs, Y_test, lda_fs)
+error_temp, prediction = train_test(X_train_fs, Y_train, X_test_fs, Y_test, lda_fs, show_time)
 
 classificationError_lda_fs[0] = error_temp
+
+print("========= Confusion matrix for LDA with FS, the training shape is {} ========== ".format(
+    X_train_fs.shape))
+
+plot_confusion_matrix(Y_test, prediction, lda_fs, X_train_fs)
 
 
 for iteration in range(final_dimension-1):
@@ -187,7 +192,9 @@ for iteration in range(final_dimension-1):
     print("The removed colomns", removed)
 
     remaining.remove(worst_item)
-    print("The remained colomns {}\n".format(remaining))
+    print("================= The remained colomns {} ====================\n".format(remaining))
+
+    # calculate best remaining
 
     X_train_selection = np.delete(X_train_fs, removed, 1)
     X_test_selection = np.delete(X_test_fs, removed, 1)
@@ -197,18 +204,19 @@ for iteration in range(final_dimension-1):
 
 
     error, prediction_lda_fs = train_test(X_train_selection, Y_train,
-                        X_test_selection, Y_test, lda_fs)
+                        X_test_selection, Y_test, lda_fs, show_time)
 
     classificationError_lda_fs[iteration+1] = error
 
-    print("Confusion matrix for LDA with Feature selection")
+    print("========= Confusion matrix for LDA with FS, the training shape is {} ========== ".format(
+        X_train_selection.shape))
 
-    plot_confusion_matrix(Y_test, prediction_lda_fs, lda_fs)
+    plot_confusion_matrix(Y_test, prediction_lda_fs, lda_fs, X_train_selection)
     
        
 
 
-Classifier 2 SVM with Feature selection
+# Classifier 2 SVM with Feature selection
 
 print('Start Feature Selection with SVM...')
 
@@ -216,15 +224,20 @@ classificationError_svm_fs = n_test*np.ones(final_dimension)
 
 removed = []
 
-index_all = [0, 1, 2, 3, 4, 5, 6, 7]
-remaining = index_all
+
+remaining = index_all[:]
 
 
 clf_svm_fs = svm.SVC(kernel = 'linear')
-error_temp, item_ignored = train_test(
+error_temp, prediction = train_test(
     X_train_fs, Y_train, X_test_fs, Y_test, clf_svm_fs)
 
 classificationError_svm_fs[0] = error_temp
+
+print("========= Confusion matrix for SVM with FS, the training shape is {} ========== ".format(
+    X_train_fs.shape))
+
+plot_confusion_matrix(Y_test, prediction, clf_svm_fs, X_train_fs)
 
 
 for iteration in range(final_dimension-1):
@@ -260,30 +273,33 @@ for iteration in range(final_dimension-1):
     svm_fs = svm.SVC(kernel='linear')
 
     error, prediction_svm_fs = train_test(X_train_selection, Y_train,
-                                          X_test_selection, Y_test, svm_fs)
+                                          X_test_selection, Y_test, svm_fs, show_time)
 
 
     classificationError_svm_fs[iteration+1] = error
 
-    print("Confusion matrix for SVM with Feature selection")
+    print("========= Confusion matrix for SVM with FS, the training shape is {} ========== ".format(
+        X_train_selection.shape))
 
-    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs)
+    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_train_selection)
 
 
 
 plt.figure()
 plt.scatter([8,7,6,5,4], np.flip(classificationError_lda_pca), c = 'b', marker = '*', label = "PCA+LDA")
-plt.scatter([8, 7, 6, 5, 4], np.flip(classificationError_svm_pca), c='r', marker='o', label = "PCA+SVM")
+plt.scatter([8, 7, 6, 5, 4], classificationError_lda_fs,
+            c='r', marker='o', label="Feature Selection+LDA")
 plt.xlabel('Dimension')
 plt.ylabel('Error')
-plt.title('PCA Error')
+plt.title('Classifier 1 LDA')
 plt.legend()
 
 
 plt.figure()
-plt.scatter([8,7,6,5,4], classificationError_lda_fs, c = 'b', marker = '*', label = "Feature Selection+LDA")
+plt.scatter([8, 7, 6, 5, 4], np.flip(classificationError_svm_pca),
+            c='b', marker='*', label="PCA+SVM")
 plt.scatter([8, 7, 6, 5, 4], classificationError_svm_fs, c='r', marker='o', label = "Feature Selection+SVM")
 plt.xlabel('Dimension')
 plt.ylabel('Error')
-plt.title('Feature Selection Error')
+plt.title('Classifier 2 SVM')
 plt.legend()

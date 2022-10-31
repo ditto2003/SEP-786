@@ -29,32 +29,49 @@ def mat_to_array(mat_contents):
     return vibration_signal_all
 
 
-def plot_confusion_matrix(Y_test, prediction, clf):
+def plot_confusion_matrix(Y_test, prediction, clf,X_train):
     
     cm = confusion_matrix(Y_test, prediction, labels=clf.classes_)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm,display_labels=clf.classes_)
-                            
+    
     disp.plot()
-
+    disp.ax_.set_title('{}+{}'.format(clf,X_train.shape))
     plt.show()
 
 
-def train_test(X_train,Y_train, X_test,Y_test,clf):
-    start_time = time.time()
-
-
-
- 
-    clf.fit(X_train,Y_train)
-    print(f"The experiment is %s \n" % (clf))
-    print("The shape of X_train is {} \n".format(X_train.shape))
-    print("The train time is --- %s seconds ---" % (time.time() - start_time))
+def train_test(X_train,Y_train, X_test,Y_test,clf, show_time =False):
     
-    start_time_test = time.time()
-    prediction = clf.predict(X_test)
-    print("The test time is --- %s seconds ---" % (time.time() - start_time_test))
+    if show_time == True:
+        print("The experiment is %s \n" % (clf))
+        print("The shape of X_train is {} \n".format(X_train.shape))
+        
+        start_time = time.time()
 
 
-    error = sum(prediction != Y_test)
+
+    
+        clf.fit(X_train,Y_train)
+
+        print("The train time is --- %.8f seconds ---" % (time.time() - start_time))
+        
+        start_time_test = time.time()
+        prediction = clf.predict(X_test)
+        print("The test time is --- %.8f seconds ---" % (time.time() - start_time_test))
+        
+        error = sum(prediction != Y_test)
+
+        
+    else:
+
+           
+        clf.fit(X_train,Y_train)
+        
+        start_time_test = time.time()
+        prediction = clf.predict(X_test)
+
+
+
+
+        error = sum(prediction != Y_test)
 
     return error, prediction
