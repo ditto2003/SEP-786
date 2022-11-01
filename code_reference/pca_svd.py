@@ -9,8 +9,8 @@ def pca(X,k=None):
        #remove mean: feature normalization
        mu = np.mean(X, axis=0)
        Xc = X - mu
-       #SVD on Xc
-       U,S,Vt = np.linalg.svd(Xc)
+       #SVD on Xc; full_matrices=False for n >> p matrices (thin SVD)
+       U,S,Vt = np.linalg.svd(Xc,full_matrices=False)
        #transpose Vt -> columns are principle axes
        V = Vt.T
        #compute scores projected on k-dimensions = XV
