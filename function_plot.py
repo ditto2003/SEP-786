@@ -51,27 +51,25 @@ def train_test(X_train,Y_train, X_test,Y_test,clf, show_time =False):
 
     
         clf.fit(X_train,Y_train)
-
-        print("The train time is --- %.8f seconds ---" % (time.time() - start_time))
+        train_time = time.time()-start_time
+        print("The train time is --- %.8f seconds ---" % (train_time))
         
         start_time_test = time.time()
         prediction = clf.predict(X_test)
-        print("The test time is --- %.8f seconds ---" % (time.time() - start_time_test))
+        test_time = time.time()-start_time_test
+        print("The test time is --- %.8f seconds ---" % (test_time))
         
-        error = sum(prediction != Y_test)
+        error = sum(abs(prediction != Y_test))
 
+        return error, prediction, train_time, test_time
         
-    else:
-
-           
+    else:           
         clf.fit(X_train,Y_train)
         
         start_time_test = time.time()
         prediction = clf.predict(X_test)
 
 
-
-
-        error = sum(prediction != Y_test)
-
-    return error, prediction
+        error = sum(abs(prediction != Y_test))
+        
+        return error, prediction
