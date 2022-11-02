@@ -29,13 +29,13 @@ def mat_to_array(mat_contents):
     return vibration_signal_all
 
 
-def plot_confusion_matrix(Y_test, prediction, clf,X_train):
+def plot_confusion_matrix(Y_test, prediction, clf,X_test):
     
     cm = confusion_matrix(Y_test, prediction, labels=clf.classes_)
     disp = ConfusionMatrixDisplay(confusion_matrix=cm,display_labels=clf.classes_)
     
     disp.plot()
-    disp.ax_.set_title('{}+{}'.format(clf,X_train.shape))
+    disp.ax_.set_title('{}+{}'.format(clf,X_test.shape))
     plt.show()
 
 
