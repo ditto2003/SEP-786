@@ -10,7 +10,7 @@ from function_plot import mat_to_array
 from function_plot import plot_confusion_matrix
 from function_plot import train_test
 import time
-
+import pandas as pd
 
 
 
@@ -25,8 +25,8 @@ mat_contents_bad = Load_mat_single(path_bad)
 bad_data = mat_to_array(mat_contents_bad)
 
 show_time = True
-# constuct the data
 
+# constuct the data
 X = np.concatenate((good_data,bad_data))
 
 n_sample = good_data.shape[0]
@@ -36,7 +36,6 @@ Y = np.zeros(n_sample)
 Y = np.concatenate((Y, np.ones(n_sample)))
 
 # PCA
-
 print("Start PCA process...")
 
 
@@ -48,19 +47,24 @@ C_x = np.dot(X_mean.T,X_mean)
 SS_pca,V = np.linalg.eig(C_x)
 
 # from large to small
-
+# sort by eigen values 
 sortIndex = np.flip(np.argsort(SS_pca)) 
-
+# sort eigen vectors by eigen values
 dimension = good_data.shape[1]
 VSorted = np.empty((dimension,0))
 
 for i in range(dimension):
     VSorted = np.append(VSorted, V[:,sortIndex[i]].reshape(dimension,1), axis=1)
 
-
+# initiate error record List
 classificationError_lda_pca = np.zeros(5,)
 classificationError_svm_pca = np.zeros(5,)
-
+# initiate time track list 
+pca_lda_time = {'train':[],'test':[]}
+pca_svm_time = {'train':[],'test':[]}
+fs_lda_time = {'train':[],'test':[]}
+fs_svm_time = {'train':[],'test':[]}
+# project X in score space
 Score_Sorted = np.dot(X,VSorted)
 
 train_index  = np.arange(0,n_sample*0.75).astype(int).tolist()+np.arange(n_sample,n_sample+n_sample*0.75).astype(int).tolist()
@@ -89,8 +93,9 @@ for numDims in range(4,9):
     lda_pca = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
     X_test_temp = X_test[:,0:numDims]
 
-    error,prediction_lda_pca = train_test(Score_Reduced,Y_train,X_test_temp,Y_test,  lda_pca, show_time)
-    
+    error,prediction_lda_pca,train_time,test_time = train_test(Score_Reduced,Y_train,X_test_temp,Y_test,  lda_pca, show_time)
+    pca_lda_time['train'].append(train_time)
+    pca_lda_time['test'].append(test_time)
     
     classificationError_lda_pca[numDims-4] =error
     
@@ -98,7 +103,8 @@ for numDims in range(4,9):
 
     plot_confusion_matrix(Y_test, prediction_lda_pca, lda_pca, Score_Reduced)
 
-
+# convert to data frame as prep for saving
+pca_lda_time = pd.DataFrame.from_dict(pca_lda_time)
 
 
 # Classifier 2 SVM with PCA
@@ -115,15 +121,21 @@ for numDims in range(4,9):
 
     X_test_temp = X_test[:,0:numDims]
 
-    error, prediction_svm_pca = train_test(
+    error, prediction_svm_pca, train_time, test_time = train_test(
         Score_Reduced, Y_train, X_test_temp, Y_test,  clf_svm_pca, show_time)
-    
+    pca_svm_time['train'].append(train_time)
+    pca_svm_time['test'].append(test_time)
+
     classificationError_svm_pca[numDims-4] = error
 
 
     print("========= Confusion matrix for SVM with PCA, Reduced score shape is {} ========== ".format(Score_Reduced.shape))
     plot_confusion_matrix(Y_test, prediction_svm_pca, lda_pca, Score_Reduced)
 
+#export compuntational time for using PCA feature extraction 
+pca_svm_time = pd.DataFrame.from_dict(pca_lda_time)
+pca_compute_time = pd.concat([pca_lda_time,pca_svm_time],keys=['LDA','SVM'])
+pca_compute_time.to_csv('pca_compute_time.csv',index=True)
 
 
 # # Feature selection-backward search
@@ -146,7 +158,7 @@ print('Start Feature Selection with LDA...')
 
 removed = []
 
-index_all = [0,1,2,3,4,5, 6, 7]
+index_all = [0,1,2,3,4,5,6,7]
 remaining = index_all[:]
 
 
@@ -156,7 +168,9 @@ classificationError_lda_fs= n_test*np.ones(final_dimension)
 
 lda_fs = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
 
-error_temp, prediction = train_test(X_train_fs, Y_train, X_test_fs, Y_test, lda_fs, show_time)
+error_temp, prediction,train_time,test_time = train_test(X_train_fs, Y_train, X_test_fs, Y_test, lda_fs, show_time)
+fs_lda_time['train'].append(train_time)
+fs_lda_time['test'].append(test_time)
 
 classificationError_lda_fs[0] = error_temp
 
@@ -203,8 +217,10 @@ for iteration in range(final_dimension-1):
     lda_fs = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
 
 
-    error, prediction_lda_fs = train_test(X_train_selection, Y_train,
+    error, prediction_lda_fs,train_time,test_time = train_test(X_train_selection, Y_train,
                         X_test_selection, Y_test, lda_fs, show_time)
+    fs_lda_time['train'].append(train_time)
+    fs_lda_time['test'].append(test_time)
 
     classificationError_lda_fs[iteration+1] = error
 
@@ -212,8 +228,9 @@ for iteration in range(final_dimension-1):
         X_train_selection.shape))
 
     plot_confusion_matrix(Y_test, prediction_lda_fs, lda_fs, X_train_selection)
-    
-       
+
+# convert to data frame as prep for saving    
+fs_lda_time = pd.DataFrame.from_dict(fs_lda_time)
 
 
 # Classifier 2 SVM with Feature selection
@@ -229,8 +246,10 @@ remaining = index_all[:]
 
 
 clf_svm_fs = svm.SVC(kernel = 'linear')
-error_temp, prediction = train_test(
-    X_train_fs, Y_train, X_test_fs, Y_test, clf_svm_fs)
+error_temp, prediction, train_time, test_time = train_test(
+    X_train_fs, Y_train, X_test_fs, Y_test, clf_svm_fs,show_time)
+fs_svm_time['train'].append(train_time)
+fs_svm_time['test'].append(test_time)
 
 classificationError_svm_fs[0] = error_temp
 
@@ -272,9 +291,10 @@ for iteration in range(final_dimension-1):
 
     svm_fs = svm.SVC(kernel='linear')
 
-    error, prediction_svm_fs = train_test(X_train_selection, Y_train,
+    error, prediction_svm_fs,train_time,test_time = train_test(X_train_selection, Y_train,
                                           X_test_selection, Y_test, svm_fs, show_time)
-
+    fs_svm_time['train'].append(train_time)
+    fs_svm_time['test'].append(test_time)
 
     classificationError_svm_fs[iteration+1] = error
 
@@ -283,7 +303,10 @@ for iteration in range(final_dimension-1):
 
     plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_train_selection)
 
-
+#export compuntational time for using backward selection feature extraction 
+fs_svm_time = pd.DataFrame.from_dict(fs_svm_time)
+fs_compute_time = pd.concat([fs_lda_time,fs_svm_time],keys=['LDA','SVM'])
+fs_compute_time.to_csv('fs_compute_time.csv',index=True)
 
 plt.figure()
 plt.scatter([8,7,6,5,4], np.flip(classificationError_lda_pca), c = 'b', marker = '*', label = "PCA+LDA")
