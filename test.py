@@ -2,9 +2,11 @@ import scipy.io as sio
 import matplotlib.pyplot as plt
 import numpy as np
 import sklearn.discriminant_analysis
-# from sklearn import svm
+from sklearn import svm
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import seaborn as sns
+from sklearn import metrics
+from sklearn.preprocessing import StandardScaler
 
 from sklearn import model_selection
 import timeit
@@ -125,8 +127,24 @@ def lda_test(data, label):
     lda.fit(X_train, y_train)
     prediction = lda.predict(X_test)
     error = sum(prediction != y_test)
-    print(f"Total feature selection error with three features: {error}")
+    print(f"Total feature selection error: {error}")
+    # Plot the confusion matrix based on LDA prediction result
     plot_confusion_matrix("LDA", y_test, prediction)
+    # Add the results to a new dictionary for comparing at the end
+    store_data("LDA", prediction, y_test)
+
+def svm_test(data, label):
+    """SVM with linear kernel"""
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(data, label, test_size=0.25, random_state=1)
+    svc = svm.SVC(kernel='linear', C=1, gamma='scale')
+    # Fit the model
+    svm_train = svc.fit(X_train, y_train)
+    # Predict the results
+    svm_y_pred = svm_train.predict(X_test)
+    # Plot the confusion matrix based on SVM prediction result
+    plot_confusion_matrix("SVM - Linear Kernel", y_test, svm_y_pred)
+    # Add the results to a new dictionary for comparing at the end
+    store_data("SVM", svm_y_pred, y_test)
 
 def plot_confusion_matrix(model, y_test, y_pred):
     plt.figure(figsize=(10, 5))
@@ -142,7 +160,17 @@ def plot_confusion_matrix(model, y_test, y_pred):
     ax.yaxis.set_ticklabels(['False', 'True'])
     ## Display the visualization of the Confusion Matrix.
     # 
-    #    
+
+models=[]
+def store_data(model_name,y_test, y_pred):
+    model = {}
+    model['label'] = '{} with droped dataset'.format(model_name)
+    model['pred'] = y_pred
+    model['test'] = y_test
+
+    models.append(model)
+
+
 if __name__ == "__main__":
     # Load the .mat files
     mat_contents_good = load_mat_single(PATH_GOOD)
@@ -154,14 +182,26 @@ if __name__ == "__main__":
     X = np.concatenate((good_data,bad_data), axis=0)    # (96000,8)
     Y = np.concatenate((np.zeros(good_data.shape[0]), np.ones(bad_data.shape[0])), axis=0)  # (96000, )
 
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(X)
+
     # LDA for original data
     lda_test(data=X, label=Y)
     lda_time = timeit.Timer(stmt="lda_test", setup="from __main__ import lda_test, X, Y")
     print("LDA processing time: ", lda_time.timeit(number=1000), "milliseconds")
 
+    # # LDA for scaled original data
+    # lda_test(data=scaled_data, label=Y)
+    # lda_time = timeit.Timer(stmt="lda_test", setup="from __main__ import lda_test, scaled_data, Y")
+    # print("LDA processing time: ", lda_time.timeit(number=1000), "milliseconds")
+
+    # SVM for scaled original data
+    svm_test(data=scaled_data, label=Y)
+    svm_time = timeit.Timer(stmt="svm_test", setup="from __main__ import svm_test, scaled_data, Y")
+    print("SVM processing time: ", svm_time.timeit(number=1000), "milliseconds")
 
     # PCA reduct one dimension
-    pca_data = pca_data(X, debug=True)
+    pca_data = pca_data(X, debug=False)
     pca_time = timeit.Timer(stmt="pca_data", setup="from __main__ import pca_data, X")
     print("PCA processing time: ", pca_time.timeit(number=1000), "milliseconds")
 
@@ -169,5 +209,34 @@ if __name__ == "__main__":
     lda_test(data=pca_data, label=Y)
     lda_time = timeit.Timer(stmt="lda_test", setup="from __main__ import lda_test, pca_data, Y")
     print("LDA processing time: ", lda_time.timeit(number=1000), "milliseconds")
+
+    # SVM for selected features data
+    svm_test(data=pca_data, label=Y)
+    svm_time = timeit.Timer(stmt="svm_test", setup="from __main__ import svm_test, pca_data, Y")
+    print("SVM processing time: ", svm_time.timeit(number=1000), "milliseconds")
+
+    # Show ROC curve
+    plt.figure(figsize = (10, 5))
+    for m in models:
+        mod = m['label']
+        y_pred = m['pred']
+        y_test = m['test']
+        # Compute False postive rate, and True positive rate
+        fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred)
+        # Calculate Accuracy of the curve to display on the plot
+        auc = metrics.auc(fpr, tpr)#metrics.roc_auc_score(y_test, y_pred)
+        # Now, plot the computed values
+        plt.plot(fpr, tpr, label='%s ROC (area = %0.2f%%)' % (m['label'], auc*100))
+    # Custom settings for the plot
+    plt.plot([0, 1], [0, 1],'r--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('1-Specificity(False Positive Rate)')
+    plt.ylabel('Sensitivity(True Positive Rate)')
+    plt.title('Receiver Operating Characteristic')
+    plt.legend(loc="lower right")
+    # Display
+    # plt.ioff()
+
 
     plt.show()
