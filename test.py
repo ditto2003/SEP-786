@@ -10,8 +10,8 @@ from sklearn import model_selection
 import timeit
 # import sys
 
-PATH_GOOD = './SEP-786/data/baseline_20220915_sv.mat'
-PATH_BAD = './SEP-786/data/fault7_20220915_sv.mat'
+PATH_GOOD = '../SEP-786/data/baseline_20220915_sv.mat'
+PATH_BAD = '../SEP-786/data/fault7_20220915_sv.mat'
 
 
 def load_mat_single(data_path):
@@ -60,6 +60,7 @@ def pca_data(data, debug=False):
         mse.append(np.sum(np.square(reconstruct_data[col]-data[col]), axis=0) / data.shape[0])  # 96000
     # print(f"Original MSE: {mse}")
     plt.ioff()
+    plt.figure(figsize=(10, 5))
     # plt.xlabel('# of Features')
     # plt.ylabel('MSE')
     plt.plot(mse, label="Original data")
@@ -89,7 +90,7 @@ def pca_data(data, debug=False):
             # Plot the MSE
             plt.plot(mse, label=str(reduct_dim))
 
-    plt.ion()
+    # plt.ion()
     return reconstruct_data
     """Optimizing process for automation test"""
     # for num in range(1, sorted_eigen_value_index.shape[0]):
@@ -160,7 +161,7 @@ if __name__ == "__main__":
 
 
     # PCA reduct one dimension
-    pca_data = pca_data(X, debug=False)
+    pca_data = pca_data(X, debug=True)
     pca_time = timeit.Timer(stmt="pca_data", setup="from __main__ import pca_data, X")
     print("PCA processing time: ", pca_time.timeit(number=1000), "milliseconds")
 
