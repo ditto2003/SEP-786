@@ -45,33 +45,30 @@ def train_test(X_train,Y_train, X_test,Y_test,clf, show_time =False):
         print("The experiment is %s \n" % (clf))
         print("The shape of X_train is {} \n".format(X_train.shape))
         
+        #start training classifier
         start_time = time.time()
-
-
-
-    
         clf.fit(X_train,Y_train)
-
-        print("The train time is --- %.8f seconds ---" % (time.time() - start_time))
+        train_time = time.time()-start_time
+        print("The train time is --- %.8f seconds ---" % (train_time))
         
+        #testing the fitted model
         start_time_test = time.time()
         prediction = clf.predict(X_test)
-        print("The test time is --- %.8f seconds ---" % (time.time() - start_time_test))
+        test_time = time.time()-start_time_test
+        print("The test time is --- %.8f seconds ---" % (test_time))
         
+        #compute error
         error = sum(prediction != Y_test)
 
+        return error, prediction, train_time, test_time
         
-    else:
-
-           
+    else:           
         clf.fit(X_train,Y_train)
         
         start_time_test = time.time()
         prediction = clf.predict(X_test)
 
 
-
-
         error = sum(prediction != Y_test)
-
-    return error, prediction
+        
+        return error, prediction
