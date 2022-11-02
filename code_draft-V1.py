@@ -105,7 +105,7 @@ for numDims in range(4,9):
 
 # convert to data frame as prep for saving
 pca_lda_time = pd.DataFrame.from_dict(pca_lda_time)
-
+pca_lda_time.index = ['4','5','6','7','8']
 
 # Classifier 2 SVM with PCA
 
@@ -133,7 +133,8 @@ for numDims in range(4,9):
     plot_confusion_matrix(Y_test, prediction_svm_pca, lda_pca, Score_Reduced)
 
 #export compuntational time for using PCA feature extraction 
-pca_svm_time = pd.DataFrame.from_dict(pca_lda_time)
+pca_svm_time = pd.DataFrame.from_dict(pca_svm_time)
+pca_svm_time.index = ['4','5','6','7','8']
 pca_compute_time = pd.concat([pca_lda_time,pca_svm_time],keys=['LDA','SVM'])
 pca_compute_time.to_csv('pca_compute_time.csv',index=True)
 
@@ -231,6 +232,7 @@ for iteration in range(final_dimension-1):
 
 # convert to data frame as prep for saving    
 fs_lda_time = pd.DataFrame.from_dict(fs_lda_time)
+fs_lda_time.index = ['8','7','6','5','4']
 
 
 # Classifier 2 SVM with Feature selection
@@ -305,9 +307,11 @@ for iteration in range(final_dimension-1):
 
 #export compuntational time for using backward selection feature extraction 
 fs_svm_time = pd.DataFrame.from_dict(fs_svm_time)
+fs_svm_time.index = ['8','7','6','5','4']
 fs_compute_time = pd.concat([fs_lda_time,fs_svm_time],keys=['LDA','SVM'])
 fs_compute_time.to_csv('fs_compute_time.csv',index=True)
 
+#export result plots
 plt.figure()
 plt.scatter([8,7,6,5,4], np.flip(classificationError_lda_pca), c = 'b', marker = '*', label = "PCA+LDA")
 plt.scatter([8, 7, 6, 5, 4], classificationError_lda_fs,
