@@ -101,7 +101,7 @@ for numDims in range(4,9):
     
     print("========= Confusion matrix for LDA with PCA,Reduced score shape is {} ========== ".format(Score_Reduced.shape) )
 
-    plot_confusion_matrix(Y_test, prediction_lda_pca, lda_pca, Score_Reduced)
+    plot_confusion_matrix(Y_test, prediction_lda_pca, lda_pca, X_test_temp)
 
 # convert to data frame as prep for saving
 pca_lda_time = pd.DataFrame.from_dict(pca_lda_time)
@@ -130,7 +130,7 @@ for numDims in range(4,9):
 
 
     print("========= Confusion matrix for SVM with PCA, Reduced score shape is {} ========== ".format(Score_Reduced.shape))
-    plot_confusion_matrix(Y_test, prediction_svm_pca, lda_pca, Score_Reduced)
+    plot_confusion_matrix(Y_test, prediction_svm_pca, lda_pca, X_test_temp)
 
 #export compuntational time for using PCA feature extraction 
 pca_svm_time = pd.DataFrame.from_dict(pca_svm_time)
@@ -178,7 +178,7 @@ classificationError_lda_fs[0] = error_temp
 print("========= Confusion matrix for LDA with FS, the training shape is {} ========== ".format(
     X_train_fs.shape))
 
-plot_confusion_matrix(Y_test, prediction, lda_fs, X_train_fs)
+plot_confusion_matrix(Y_test, prediction, lda_fs, X_test_fs)
 
 
 for iteration in range(final_dimension-1):
@@ -228,7 +228,7 @@ for iteration in range(final_dimension-1):
     print("========= Confusion matrix for LDA with FS, the training shape is {} ========== ".format(
         X_train_selection.shape))
 
-    plot_confusion_matrix(Y_test, prediction_lda_fs, lda_fs, X_train_selection)
+    plot_confusion_matrix(Y_test, prediction_lda_fs, lda_fs, X_test_selection)
 
 # convert to data frame as prep for saving    
 fs_lda_time = pd.DataFrame.from_dict(fs_lda_time)
@@ -258,7 +258,7 @@ classificationError_svm_fs[0] = error_temp
 print("========= Confusion matrix for SVM with FS, the training shape is {} ========== ".format(
     X_train_fs.shape))
 
-plot_confusion_matrix(Y_test, prediction, clf_svm_fs, X_train_fs)
+plot_confusion_matrix(Y_test, prediction, clf_svm_fs, X_test_fs)
 
 
 for iteration in range(final_dimension-1):
@@ -303,7 +303,7 @@ for iteration in range(final_dimension-1):
     print("========= Confusion matrix for SVM with FS, the training shape is {} ========== ".format(
         X_train_selection.shape))
 
-    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_train_selection)
+    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_test_selection)
 
 #export compuntational time for using backward selection feature extraction 
 fs_svm_time = pd.DataFrame.from_dict(fs_svm_time)
