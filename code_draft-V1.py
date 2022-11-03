@@ -122,7 +122,7 @@ for numDims in range(4,9):
 
 
     print("========= Confusion matrix for SVM with PCA, Reduced score shape is {} ========== ".format(Score_Reduced.shape))
-    plot_confusion_matrix(Y_test, prediction_svm_pca, lda_pca, X_test_temp)
+    plot_confusion_matrix(Y_test, prediction_svm_pca,  clf_svm_pca, X_test_temp)
 
 
 
