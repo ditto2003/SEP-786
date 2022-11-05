@@ -1,3 +1,8 @@
+# SEP 786 Project report
+# Yu Zhang         400429707
+# Xiaoyu Jiang     400057533
+# Mingming Zhang   400349051
+
 import scipy.io as sio
 
 import matplotlib.pyplot as plt
@@ -35,10 +40,10 @@ n_feature  = good_data.shape[1]
 Y = np.zeros(n_sample)
 Y = np.concatenate((Y, np.ones(n_sample)))
 
-# PCA
+# =====================================PCA=========================================
 print("Start PCA process...")
 
-
+FE_type ="PCA"
 X_mean = X - np.mean(X)
 
 
@@ -79,7 +84,7 @@ Y_train = Y[train_index]
 Y_test = Y[test_index]
 
 
-# Classifier 1 LDA with PCA
+# ---------------------Classifier 1 LDA with PCA-----------------------
 
 
 for numDims in range(4,9):
@@ -101,13 +106,13 @@ for numDims in range(4,9):
     
     print("========= Confusion matrix for LDA with PCA,Reduced score shape is {} ========== ".format(Score_Reduced.shape) )
 
-    plot_confusion_matrix(Y_test, prediction_lda_pca, lda_pca, X_test_temp)
+    plot_confusion_matrix(Y_test, prediction_lda_pca, lda_pca, X_test_temp,FE_type )
 
 # convert to data frame as prep for saving
 pca_lda_time = pd.DataFrame.from_dict(pca_lda_time)
 pca_lda_time.index = ['4','5','6','7','8']
 
-# Classifier 2 SVM with PCA
+# -------------------------------Classifier 2 SVM with PCA---------------------------
 
 for numDims in range(4,9): 
     
@@ -130,7 +135,7 @@ for numDims in range(4,9):
 
 
     print("========= Confusion matrix for SVM with PCA, Reduced score shape is {} ========== ".format(Score_Reduced.shape))
-    plot_confusion_matrix(Y_test, prediction_svm_pca,  clf_svm_pca, X_test_temp)
+    plot_confusion_matrix(Y_test, prediction_svm_pca,  clf_svm_pca, X_test_temp,FE_type )
 
 #export compuntational time for using PCA feature extraction 
 pca_svm_time = pd.DataFrame.from_dict(pca_svm_time)
@@ -139,9 +144,11 @@ pca_compute_time = pd.concat([pca_lda_time,pca_svm_time],keys=['LDA','SVM'])
 pca_compute_time.to_csv('pca_compute_time.csv',index=True)
 
 
-# # Feature selection-backward search
+# ===================================== Feature selection-backward search=============================
 
 print("Start Feature Selection process...")
+
+FE_type = 'SBG'
 
 X_train_fs = X[train_index,:]
 
@@ -151,18 +158,14 @@ n_train = X_train_fs.shape[0]
 n_test = X_test_fs.shape[0]
 final_dimension = 5
 
-# Classifier 1 LDA with Feature selection
+# -------------------------------Classifier 1 LDA with Feature selection-----------------------
 print('Start Feature Selection with LDA...')
-
-
 
 
 removed = []
 
 index_all = [0,1,2,3,4,5,6,7]
 remaining = index_all[:]
-
-
 
 
 classificationError_lda_fs= n_test*np.ones(final_dimension)
@@ -178,7 +181,7 @@ classificationError_lda_fs[0] = error_temp
 print("========= Confusion matrix for LDA with FS, the training shape is {} ========== ".format(
     X_train_fs.shape))
 
-plot_confusion_matrix(Y_test, prediction, lda_fs, X_test_fs)
+plot_confusion_matrix(Y_test, prediction, lda_fs, X_test_fs,FE_type)
 
 
 for iteration in range(final_dimension-1):
@@ -228,14 +231,14 @@ for iteration in range(final_dimension-1):
     print("========= Confusion matrix for LDA with FS, the training shape is {} ========== ".format(
         X_train_selection.shape))
 
-    plot_confusion_matrix(Y_test, prediction_lda_fs, lda_fs, X_test_selection)
+    plot_confusion_matrix(Y_test, prediction_lda_fs, lda_fs, X_test_selection,FE_type )
 
 # convert to data frame as prep for saving    
 fs_lda_time = pd.DataFrame.from_dict(fs_lda_time)
 fs_lda_time.index = ['8','7','6','5','4']
 
 
-# Classifier 2 SVM with Feature selection
+# --------------------------------Classifier 2 SVM with Feature selection--------------------------------
 
 print('Start Feature Selection with SVM...')
 
@@ -258,7 +261,7 @@ classificationError_svm_fs[0] = error_temp
 print("========= Confusion matrix for SVM with FS, the training shape is {} ========== ".format(
     X_train_fs.shape))
 
-plot_confusion_matrix(Y_test, prediction, clf_svm_fs, X_test_fs)
+plot_confusion_matrix(Y_test, prediction, clf_svm_fs, X_test_fs,FE_type )
 
 
 for iteration in range(final_dimension-1):
@@ -303,7 +306,7 @@ for iteration in range(final_dimension-1):
     print("========= Confusion matrix for SVM with FS, the training shape is {} ========== ".format(
         X_train_selection.shape))
 
-    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_test_selection)
+    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_test_selection,FE_type )
 
 #export compuntational time for using backward selection feature extraction 
 fs_svm_time = pd.DataFrame.from_dict(fs_svm_time)
@@ -311,7 +314,7 @@ fs_svm_time.index = ['8','7','6','5','4']
 fs_compute_time = pd.concat([fs_lda_time,fs_svm_time],keys=['LDA','SVM'])
 fs_compute_time.to_csv('fs_compute_time.csv',index=True)
 
-#export result plots
+#===============================export result plots==================================
 plt.figure()
 plt.scatter([8,7,6,5,4], np.flip(classificationError_lda_pca), c = 'b', marker = '*', label = "PCA+LDA")
 plt.scatter([8, 7, 6, 5, 4], classificationError_lda_fs,
