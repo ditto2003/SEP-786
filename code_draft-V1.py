@@ -287,34 +287,18 @@ for iteration in range(final_dimension-1):
     X_test_selection = np.delete(X_test_fs, removed, 1)
     # Create SVM classifier with Linear kernal
     svm_fs = svm.SVC(kernel='linear')
-<<<<<<< HEAD
-    # Train the data and enable/disable the time flag
-    error, prediction_svm_fs = train_test(X_train_selection, Y_train,
-                                          X_test_selection, Y_test, svm_fs, show_time)
-
-    # Statistical ERROR
-=======
 
     error, prediction_svm_fs,train_time,test_time = train_test(X_train_selection, Y_train,
                                           X_test_selection, Y_test, svm_fs, show_time)
     fs_svm_time['train'].append(train_time)
     fs_svm_time['test'].append(test_time)
 
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
     classificationError_svm_fs[iteration+1] = error
 
     print("========= Confusion matrix for SVM with FS, the training shape is {} ========== ".format(
         X_train_selection.shape))
-<<<<<<< HEAD
-    # Plot the confusion matrix
-    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_train_selection)
 
-
-"""Scatter the comparison of feature extraction"""
-# Scatter the LDA with PCA & SBG
-=======
-
-    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_test_selection,FE_type )
+    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_test_selection,FE_type)
 
 #export compuntational time for using backward selection feature extraction 
 fs_svm_time = pd.DataFrame.from_dict(fs_svm_time)
@@ -323,7 +307,6 @@ fs_compute_time = pd.concat([fs_lda_time,fs_svm_time],keys=['LDA','SVM'])
 fs_compute_time.to_csv('fs_compute_time.csv',index=True)
 
 #===============================export result plots==================================
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
 plt.figure()
 plt.scatter([8,7,6,5,4], np.flip(classificationError_lda_pca), c = 'b', marker = '*', label = "PCA+LDA")
 plt.scatter([8, 7, 6, 5, 4], classificationError_lda_fs,
