@@ -1,6 +1,4 @@
-<<<<<<< HEAD
 """System packages that feature extraction comparison used"""
-=======
 # SEP 786 Project report
 # Yu Zhang         400429707
 # Xiaoyu Jiang     400057533
@@ -8,7 +6,6 @@
 
 import scipy.io as sio
 
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
 import matplotlib.pyplot as plt
 import numpy as np
 import sklearn.discriminant_analysis
@@ -18,13 +15,10 @@ from function_plot import Load_mat_single
 from function_plot import mat_to_array
 from function_plot import plot_confusion_matrix
 from function_plot import train_test
-<<<<<<< HEAD
-=======
 import time
 import pandas as pd
 
 
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
 
 """Load Data"""
 # Path
@@ -39,12 +33,9 @@ bad_data = mat_to_array(mat_contents_bad)
 # Debug flag about time
 show_time = True
 
-<<<<<<< HEAD
 """Construct the data"""
 # Merge the data
-=======
 # constuct the data
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
 X = np.concatenate((good_data,bad_data))
 # Create the label
 n_sample = good_data.shape[0]
@@ -53,7 +44,6 @@ n_feature  = good_data.shape[1]
 Y = np.zeros(n_sample)
 Y = np.concatenate((Y, np.ones(n_sample)))
 
-<<<<<<< HEAD
 """
 Comparison 1
 Feature Extraction: PCA
@@ -61,49 +51,32 @@ Classifer: LDA and SVM
 """
 print("Start PCA process...")
 # Centralize the data
-=======
 # =====================================PCA=========================================
 print("Start PCA process...")
 
 FE_type ="PCA"
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
 X_mean = X - np.mean(X)
 # Calc Covariance matrix
 C_x = np.dot(X_mean.T,X_mean)
 # Calc eigen value & vector
 SS_pca,V = np.linalg.eig(C_x)
-<<<<<<< HEAD
 # Order the eigen value index from large to small
 sortIndex = np.flip(np.argsort(SS_pca)) 
 # Order the eigen vector by the index of the ordered eigen value
-=======
-
-# from large to small
-# sort by eigen values 
-sortIndex = np.flip(np.argsort(SS_pca)) 
-# sort eigen vectors by eigen values
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
 dimension = good_data.shape[1]
 VSorted = np.empty((dimension,0))
 for i in range(dimension):
     VSorted = np.append(VSorted, V[:,sortIndex[i]].reshape(dimension,1), axis=1)
-<<<<<<< HEAD
 # Initialize ERROR
 classificationError_lda_pca = np.zeros(5,)
 classificationError_svm_pca = np.zeros(5,)
-# Convert to Score Space
-=======
 
-# initiate error record List
-classificationError_lda_pca = np.zeros(5,)
-classificationError_svm_pca = np.zeros(5,)
 # initiate time track list 
 pca_lda_time = {'train':[],'test':[]}
 pca_svm_time = {'train':[],'test':[]}
 fs_lda_time = {'train':[],'test':[]}
 fs_svm_time = {'train':[],'test':[]}
 # project X in score space
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
 Score_Sorted = np.dot(X,VSorted)
 
 """Category the data"""
@@ -117,42 +90,24 @@ X_test = Score_Sorted[test_index,:]
 Y_train = Y[train_index]
 Y_test = Y[test_index]
 
-<<<<<<< HEAD
 """Classifier 1: LDA with PCA"""
-# Dimensionality reduction
-=======
-
 # ---------------------Classifier 1 LDA with PCA-----------------------
 
-
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
 for numDims in range(4,9):
+    # Dimensionality reduction
     Score_Reduced = X_train[:,0:numDims]
     # Create LDA classifier
     lda_pca = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
     X_test_temp = X_test[:,0:numDims]
-<<<<<<< HEAD
     # Train the data and enable/disable the time flag
-    error,prediction_lda_pca = train_test(Score_Reduced,Y_train,X_test_temp,Y_test,  lda_pca, show_time)
-    # Statistical ERROR
-=======
-
     error,prediction_lda_pca,train_time,test_time = train_test(Score_Reduced,Y_train,X_test_temp,Y_test,  lda_pca, show_time)
     pca_lda_time['train'].append(train_time)
     pca_lda_time['test'].append(test_time)
-    
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
+    # Statistical ERROR
     classificationError_lda_pca[numDims-4] =error
     print("========= Confusion matrix for LDA with PCA,Reduced score shape is {} ========== ".format(Score_Reduced.shape) )
-<<<<<<< HEAD
     # Plot the confusion matrix
-    plot_confusion_matrix(Y_test, prediction_lda_pca, lda_pca, Score_Reduced)
-
-"""Classifier 2: SVM with PCA"""
-# Dimensionality reduction
-=======
-
-    plot_confusion_matrix(Y_test, prediction_lda_pca, lda_pca, X_test_temp,FE_type )
+    plot_confusion_matrix(Y_test, prediction_lda_pca, lda_pca, Score_Reduced,FE_type)
 
 # convert to data frame as prep for saving
 pca_lda_time = pd.DataFrame.from_dict(pca_lda_time)
@@ -160,41 +115,21 @@ pca_lda_time.index = ['4','5','6','7','8']
 
 # -------------------------------Classifier 2 SVM with PCA---------------------------
 
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
 for numDims in range(4,9): 
     Score_Reduced = X_train[:,0:numDims]
     # Create SVM classifier
     clf_svm_pca = svm.SVC(kernel = 'linear')
     X_test_temp = X_test[:,0:numDims]
-<<<<<<< HEAD
     # Train the data and enable/disable the time flag
-    error, prediction_svm_pca = train_test(
-        Score_Reduced, Y_train, X_test_temp, Y_test,  clf_svm_pca, show_time)
-    # Statistical ERROR
-=======
-
     error, prediction_svm_pca, train_time, test_time = train_test(
         Score_Reduced, Y_train, X_test_temp, Y_test,  clf_svm_pca, show_time)
     pca_svm_time['train'].append(train_time)
     pca_svm_time['test'].append(test_time)
-
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
+    # Statistical ERROR
     classificationError_svm_pca[numDims-4] = error
     print("========= Confusion matrix for SVM with PCA, Reduced score shape is {} ========== ".format(Score_Reduced.shape))
-<<<<<<< HEAD
     # Plot the confusion matrix
-    plot_confusion_matrix(Y_test, prediction_svm_pca, lda_pca, Score_Reduced)
-
-"""
-Comparison 2
-Feature Extraction: SBG(selection-backward search)
-Classifer: LDA and SVM
-"""
-# SBG
-print("Start Feature Selection process...")
-# Seperate the dataset
-=======
-    plot_confusion_matrix(Y_test, prediction_svm_pca,  clf_svm_pca, X_test_temp,FE_type )
+    plot_confusion_matrix(Y_test, prediction_svm_pca, lda_pca, Score_Reduced,FE_type)
 
 #export compuntational time for using PCA feature extraction 
 pca_svm_time = pd.DataFrame.from_dict(pca_svm_time)
@@ -202,14 +137,17 @@ pca_svm_time.index = ['4','5','6','7','8']
 pca_compute_time = pd.concat([pca_lda_time,pca_svm_time],keys=['LDA','SVM'])
 pca_compute_time.to_csv('pca_compute_time.csv',index=True)
 
-
+"""
+Comparison 2
+Feature Extraction: SBG(selection-backward search)
+Classifer: LDA and SVM
+"""
 # ===================================== Feature selection-backward search=============================
 
 print("Start Feature Selection process...")
 
 FE_type = 'SBG'
 
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
 X_train_fs = X[train_index,:]
 X_test_fs = X[test_index,:]
 
@@ -218,51 +156,31 @@ n_test = X_test_fs.shape[0]
 # Define the number of dimensionality reduction
 final_dimension = 5
 
-<<<<<<< HEAD
 """Classifier 1: LDA with SBG"""
+# -------------------------------Classifier 1 LDA with Feature selection-----------------------
 # Classifier 1 LDA with Feature selection
 print('Start Feature Selection with LDA...')
 # Initialize the feature reduction list
-=======
-# -------------------------------Classifier 1 LDA with Feature selection-----------------------
-print('Start Feature Selection with LDA...')
-
-
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
 removed = []
 
 index_all = [0,1,2,3,4,5,6,7]
 remaining = index_all[:]
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
 classificationError_lda_fs= n_test*np.ones(final_dimension)
 # Create LDA classifier
 lda_fs = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
-<<<<<<< HEAD
 # Train the data
-error_temp, prediction = train_test(X_train_fs, Y_train, X_test_fs, Y_test, lda_fs, show_time)
-# Statisical ERROR to get the original error
-=======
-
 error_temp, prediction,train_time,test_time = train_test(X_train_fs, Y_train, X_test_fs, Y_test, lda_fs, show_time)
 fs_lda_time['train'].append(train_time)
 fs_lda_time['test'].append(test_time)
 
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
+# Statisical ERROR to get the original error
 classificationError_lda_fs[0] = error_temp
 
 print("========= Confusion matrix for LDA with FS, the training shape is {} ========== ".format(
     X_train_fs.shape))
-<<<<<<< HEAD
 # Plot confusion matrix
-plot_confusion_matrix(Y_test, prediction, lda_fs, X_train_fs)
-=======
-
-plot_confusion_matrix(Y_test, prediction, lda_fs, X_test_fs,FE_type)
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
+plot_confusion_matrix(Y_test, prediction, lda_fs, X_train_fs,FE_type)
 
 # SBG for dimension reduction with LDA
 for iteration in range(final_dimension-1):
@@ -297,37 +215,23 @@ for iteration in range(final_dimension-1):
     X_test_selection = np.delete(X_test_fs, removed, 1)
     # Creat a LDA classifier
     lda_fs = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
-<<<<<<< HEAD
     # Train the feature removed data
-    error, prediction_lda_fs = train_test(X_train_selection, Y_train,
-                        X_test_selection, Y_test, lda_fs, show_time)
-    # Statistical ERROR
-=======
-
-
     error, prediction_lda_fs,train_time,test_time = train_test(X_train_selection, Y_train,
                         X_test_selection, Y_test, lda_fs, show_time)
     fs_lda_time['train'].append(train_time)
     fs_lda_time['test'].append(test_time)
-
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
+    # Statistical ERROR
     classificationError_lda_fs[iteration+1] = error
     print("========= Confusion matrix for LDA with FS, the training shape is {} ========== ".format(
         X_train_selection.shape))
-<<<<<<< HEAD
     # Plot confusion matrix
-    plot_confusion_matrix(Y_test, prediction_lda_fs, lda_fs, X_train_selection)
-=======
-
-    plot_confusion_matrix(Y_test, prediction_lda_fs, lda_fs, X_test_selection,FE_type )
+    plot_confusion_matrix(Y_test, prediction_lda_fs, lda_fs, X_test_selection,FE_type)
 
 # convert to data frame as prep for saving    
 fs_lda_time = pd.DataFrame.from_dict(fs_lda_time)
 fs_lda_time.index = ['8','7','6','5','4']
 
-
 # --------------------------------Classifier 2 SVM with Feature selection--------------------------------
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
 
 """Classifier 2: SVM with SBG"""
 print('Start Feature Selection with SVM...')
@@ -337,29 +241,19 @@ removed = []
 remaining = index_all[:]
 # Create SVM classifier with Linear kernal
 clf_svm_fs = svm.SVC(kernel = 'linear')
-<<<<<<< HEAD
+
 # Train the original data
-error_temp, prediction = train_test(
-    X_train_fs, Y_train, X_test_fs, Y_test, clf_svm_fs)
-# Statistical ERROR
-classificationError_svm_fs[0] = error_tem
-print("========= Confusion matrix for SVM with FS, the training shape is {} ========== ".format(
-    X_train_fs.shape))
-# Plot confusion matrix
-plot_confusion_matrix(Y_test, prediction, clf_svm_fs, X_train_fs)
-=======
 error_temp, prediction, train_time, test_time = train_test(
     X_train_fs, Y_train, X_test_fs, Y_test, clf_svm_fs,show_time)
 fs_svm_time['train'].append(train_time)
 fs_svm_time['test'].append(test_time)
-
+# Statistical ERROR
 classificationError_svm_fs[0] = error_temp
 
 print("========= Confusion matrix for SVM with FS, the training shape is {} ========== ".format(
     X_train_fs.shape))
-
-plot_confusion_matrix(Y_test, prediction, clf_svm_fs, X_test_fs,FE_type )
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
+# Plot confusion matrix
+plot_confusion_matrix(Y_test, prediction, clf_svm_fs, X_test_fs,FE_type)
 
 # SBG for dimension reduction with SVM
 for iteration in range(final_dimension-1):
@@ -393,34 +287,20 @@ for iteration in range(final_dimension-1):
     X_test_selection = np.delete(X_test_fs, removed, 1)
     # Create SVM classifier with Linear kernal
     svm_fs = svm.SVC(kernel='linear')
-<<<<<<< HEAD
+    
     # Train the data and enable/disable the time flag
-    error, prediction_svm_fs = train_test(X_train_selection, Y_train,
-                                          X_test_selection, Y_test, svm_fs, show_time)
-
-    # Statistical ERROR
-=======
-
     error, prediction_svm_fs,train_time,test_time = train_test(X_train_selection, Y_train,
                                           X_test_selection, Y_test, svm_fs, show_time)
     fs_svm_time['train'].append(train_time)
     fs_svm_time['test'].append(test_time)
 
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
+    # Statistical ERROR
     classificationError_svm_fs[iteration+1] = error
 
     print("========= Confusion matrix for SVM with FS, the training shape is {} ========== ".format(
         X_train_selection.shape))
-<<<<<<< HEAD
     # Plot the confusion matrix
-    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_train_selection)
-
-
-"""Scatter the comparison of feature extraction"""
-# Scatter the LDA with PCA & SBG
-=======
-
-    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_test_selection,FE_type )
+    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_train_selection,FE_type)
 
 #export compuntational time for using backward selection feature extraction 
 fs_svm_time = pd.DataFrame.from_dict(fs_svm_time)
@@ -429,7 +309,6 @@ fs_compute_time = pd.concat([fs_lda_time,fs_svm_time],keys=['LDA','SVM'])
 fs_compute_time.to_csv('fs_compute_time.csv',index=True)
 
 #===============================export result plots==================================
->>>>>>> 72e107a6bcf06cde99b77796d9d444dac725cf62
 plt.figure()
 plt.scatter([8,7,6,5,4], np.flip(classificationError_lda_pca), c = 'b', marker = '*', label = "PCA+LDA")
 plt.scatter([8, 7, 6, 5, 4], classificationError_lda_fs,
