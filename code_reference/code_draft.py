@@ -5,7 +5,6 @@ import numpy as np
 import sklearn.discriminant_analysis
 from sklearn import svm
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-import pca_svd as mypca
 
 
 
@@ -73,9 +72,6 @@ classificationError_lda_pca = np.zeros(4,)
 classificationError_svm_pca = np.zeros(4,)
 
 Score_Sorted = np.dot(X,VSorted)
-
-#compare PCA result using SVD approach 
-score_svd,mu,Vt = mypca.pca(X)
 
 train_index  = np.arange(0,n_sample*0.75).astype(int).tolist()+np.arange(n_sample,n_sample+n_sample*0.75).astype(int).tolist()
 test_index = np.arange(n_sample*0.75,n_sample).astype(int).tolist()+np.arange(n_sample+n_sample*0.75,n_sample+n_sample).astype(int).tolist()
