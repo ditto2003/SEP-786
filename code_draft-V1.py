@@ -52,7 +52,7 @@ Classifer: LDA and SVM
 print("Start PCA process...")
 # Centralize the data
 # =====================================PCA=========================================
-print("Start PCA process...")
+
 
 FE_type ="PCA"
 X_mean = X - np.mean(X)
@@ -105,9 +105,9 @@ for numDims in range(4,9):
     pca_lda_time['test'].append(test_time)
     # Statistical ERROR
     classificationError_lda_pca[numDims-4] =error
-    print("========= Confusion matrix for LDA with PCA,Reduced score shape is {} ========== ".format(Score_Reduced.shape) )
+    
     # Plot the confusion matrix
-    plot_confusion_matrix(Y_test, prediction_lda_pca, lda_pca, Score_Reduced,FE_type)
+    plot_confusion_matrix(Y_test, prediction_lda_pca, lda_pca, X_test_temp ,FE_type)
 
 # convert to data frame as prep for saving
 pca_lda_time = pd.DataFrame.from_dict(pca_lda_time)
@@ -127,9 +127,9 @@ for numDims in range(4,9):
     pca_svm_time['test'].append(test_time)
     # Statistical ERROR
     classificationError_svm_pca[numDims-4] = error
-    print("========= Confusion matrix for SVM with PCA, Reduced score shape is {} ========== ".format(Score_Reduced.shape))
+    
     # Plot the confusion matrix
-    plot_confusion_matrix(Y_test, prediction_svm_pca, lda_pca, Score_Reduced,FE_type)
+    plot_confusion_matrix(Y_test, prediction_svm_pca, clf_svm_pca, X_test_temp ,FE_type)
 
 #export compuntational time for using PCA feature extraction 
 pca_svm_time = pd.DataFrame.from_dict(pca_svm_time)
@@ -177,10 +177,9 @@ fs_lda_time['test'].append(test_time)
 # Statisical ERROR to get the original error
 classificationError_lda_fs[0] = error_temp
 
-print("========= Confusion matrix for LDA with FS, the training shape is {} ========== ".format(
-    X_train_fs.shape))
+
 # Plot confusion matrix
-plot_confusion_matrix(Y_test, prediction, lda_fs, X_train_fs,FE_type)
+plot_confusion_matrix(Y_test, prediction, lda_fs, X_test_fs,FE_type)
 
 # SBG for dimension reduction with LDA
 for iteration in range(final_dimension-1):
@@ -222,8 +221,7 @@ for iteration in range(final_dimension-1):
     fs_lda_time['test'].append(test_time)
     # Statistical ERROR
     classificationError_lda_fs[iteration+1] = error
-    print("========= Confusion matrix for LDA with FS, the training shape is {} ========== ".format(
-        X_train_selection.shape))
+
     # Plot confusion matrix
     plot_confusion_matrix(Y_test, prediction_lda_fs, lda_fs, X_test_selection,FE_type)
 
@@ -250,8 +248,7 @@ fs_svm_time['test'].append(test_time)
 # Statistical ERROR
 classificationError_svm_fs[0] = error_temp
 
-print("========= Confusion matrix for SVM with FS, the training shape is {} ========== ".format(
-    X_train_fs.shape))
+
 # Plot confusion matrix
 plot_confusion_matrix(Y_test, prediction, clf_svm_fs, X_test_fs,FE_type)
 
@@ -297,10 +294,9 @@ for iteration in range(final_dimension-1):
     # Statistical ERROR
     classificationError_svm_fs[iteration+1] = error
 
-    print("========= Confusion matrix for SVM with FS, the training shape is {} ========== ".format(
-        X_train_selection.shape))
+
     # Plot the confusion matrix
-    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_train_selection,FE_type)
+    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_test_selection,FE_type)
 
 #export compuntational time for using backward selection feature extraction 
 fs_svm_time = pd.DataFrame.from_dict(fs_svm_time)
