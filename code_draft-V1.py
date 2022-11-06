@@ -163,7 +163,7 @@ print('Start Feature Selection with LDA...')
 # Initialize the feature reduction list
 removed = []
 
-index_all = [0,1,2,3,4,5, 6, 7]
+index_all = [0,1,2,3,4,5,6,7]
 remaining = index_all[:]
 
 classificationError_lda_fs= n_test*np.ones(final_dimension)
@@ -287,18 +287,20 @@ for iteration in range(final_dimension-1):
     X_test_selection = np.delete(X_test_fs, removed, 1)
     # Create SVM classifier with Linear kernal
     svm_fs = svm.SVC(kernel='linear')
-
+    
+    # Train the data and enable/disable the time flag
     error, prediction_svm_fs,train_time,test_time = train_test(X_train_selection, Y_train,
                                           X_test_selection, Y_test, svm_fs, show_time)
     fs_svm_time['train'].append(train_time)
     fs_svm_time['test'].append(test_time)
 
+    # Statistical ERROR
     classificationError_svm_fs[iteration+1] = error
 
     print("========= Confusion matrix for SVM with FS, the training shape is {} ========== ".format(
         X_train_selection.shape))
-
-    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_test_selection,FE_type)
+    # Plot the confusion matrix
+    plot_confusion_matrix(Y_test, prediction_svm_fs, svm_fs, X_train_selection,FE_type)
 
 #export compuntational time for using backward selection feature extraction 
 fs_svm_time = pd.DataFrame.from_dict(fs_svm_time)

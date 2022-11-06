@@ -29,7 +29,7 @@ def plot_confusion_matrix(Y_test, prediction, clf, X_test, FE_type):
     disp = ConfusionMatrixDisplay(confusion_matrix=cm,display_labels=clf.classes_)
     
     disp.plot()
-    disp.ax_.set_title('{}+{}'.format(clf,X_train.shape))
+    disp.ax_.set_title('{}+{}+{}'.format(FE_type,clf,X_test.shape))
     plt.show()
 
 
@@ -66,5 +66,5 @@ def train_test(X_train,Y_train, X_test,Y_test,clf, show_time =False):
         prediction = clf.predict(X_test)
         # Statistical ERROR
         error = sum(prediction != Y_test)
-
-    return error, prediction
+        
+        return error, prediction
